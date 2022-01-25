@@ -1,0 +1,753 @@
+{
+  "SaveName": "",
+  "GameMode": "",
+  "Date": "",
+  "Table": "",
+  "Sky": "",
+  "Note": "",
+  "Rules": "",
+  "PlayerTurn": "",
+  "LuaScript": "",
+  "LuaScriptState": "",
+  "ObjectStates": [
+    {
+      "Name": "Custom_Model",
+      "Transform": {
+        "posX": 27.45387,
+        "posY": 1.057893,
+        "posZ": 15.2254152,
+        "rotX": -8.57927E-07,
+        "rotY": -0.00278665638,
+        "rotZ": 7.33325464E-07,
+        "scaleX": 0.625,
+        "scaleY": 0.625,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Lieutenant Colzet",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.9999999,
+        "g": 0.9921603,
+        "b": 0.9999999
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CustomMesh": {
+        "MeshURL": "http://cloud-3.steamusercontent.com/ugc/82591194029104263/D0F4E672CBFA645B586FFC94A334A8364B30FD38/",
+        "DiffuseURL": "http://i.imgur.com/pZXwt8z.jpg",
+        "NormalURL": "",
+        "ColliderURL": "http://cloud-3.steamusercontent.com/ugc/82591194029068301/41D4D10265D8B4B9FC1B0C640F9F8D94C816CE89/",
+        "Convex": true,
+        "MaterialIndex": 1,
+        "TypeIndex": 1,
+        "CustomShader": {
+          "SpecularColor": {
+            "r": 0.8745098,
+            "g": 0.8117647,
+            "b": 0.745098054
+          },
+          "SpecularIntensity": 0.0,
+          "SpecularSharpness": 3.0,
+          "FresnelStrength": 0.1
+        },
+        "CastShadows": true
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "cb58c5"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -6.17847633,
+        "posY": -0.0261793137,
+        "posZ": 2.59406567,
+        "rotX": 1.49610844E-06,
+        "rotY": 0.010655269,
+        "rotZ": -6.22003836E-06,
+        "scaleX": 0.6428425,
+        "scaleY": 1.0,
+        "scaleZ": 0.6428425
+      },
+      "Nickname": "Hyperwave Comm Scanner",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 46802,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "468": {
+          "FaceURL": "http://cloud-3.steamusercontent.com/ugc/200804297981914959/F3952F5F9A6548E359F5D47DE116D1292EB54B92/",
+          "BackURL": "http://cf.geekdo-images.com/images/pic2730256_md.jpg",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "2493a1"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -1.08049393,
+        "posY": -0.0261791945,
+        "posZ": 3.03448772,
+        "rotX": -4.12192E-07,
+        "rotY": 359.983063,
+        "rotZ": 6.42863961E-06,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "TIE/x1",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 21222,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "212": {
+          "FaceURL": "http://i.imgur.com/mNSQb9j.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1634616_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "8efa62"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": 0.7380676,
+        "posY": -0.0261794329,
+        "posZ": 3.02708149,
+        "rotX": -2.350986E-06,
+        "rotY": 0.008592014,
+        "rotZ": -1.49615425E-05,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Accuracy Corrector",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 21103,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "211": {
+          "FaceURL": "http://i.imgur.com/LmCEg0M.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1804744_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "44f380"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -3.757618,
+        "posY": -0.0225708485,
+        "posZ": 3.03620815,
+        "rotX": 0.132519946,
+        "rotY": 0.130068436,
+        "rotZ": 5.12382467E-05,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Major Stridan",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 47302,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "473": {
+          "FaceURL": "http://cloud-3.steamusercontent.com/ugc/200804344074736653/83F1C28F9475B131B36083BEF51459FED4658E55/",
+          "BackURL": "http://cloud-3.steamusercontent.com/ugc/200804344074737147/0D6CD5C64F1112358E758F8195B59085FF737ED4/",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "fdae99"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": 3.03246117,
+        "posY": -0.0261793137,
+        "posZ": 3.64024258,
+        "rotX": -2.054801E-07,
+        "rotY": 0.0144124813,
+        "rotZ": 1.1762171E-07,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Lieutenant Colzet",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 20238,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "202": {
+          "FaceURL": "http://img2.picload.org/image/wrgcipw/imp_pilot_cards.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic2624845_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "4a7ee3"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -8.11927,
+        "posY": -0.0261795521,
+        "posZ": 2.644906,
+        "rotX": 3.63466756E-06,
+        "rotY": 359.985138,
+        "rotZ": 4.45795E-07,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Sensor Jammer",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 21101,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "211": {
+          "FaceURL": "http://i.imgur.com/LmCEg0M.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1804744_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "402851"
+    },
+    {
+      "Name": "Custom_Model",
+      "Transform": {
+        "posX": -7.82626343,
+        "posY": 2.78949738E-05,
+        "posZ": -0.7992916,
+        "rotX": -1.65505153E-05,
+        "rotY": 359.964844,
+        "rotZ": 5.504954E-07,
+        "scaleX": 0.625,
+        "scaleY": 0.625,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Major Stridan",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.9999999,
+        "g": 0.9921603,
+        "b": 0.9999999
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CustomMesh": {
+        "MeshURL": "http://pastebin.com/nsHXF9XV",
+        "DiffuseURL": "http://cloud-3.steamusercontent.com/ugc/200804344074731693/5F3DF079490C8CBD5A6175DD3B8726DA727FEB4A/",
+        "NormalURL": "",
+        "ColliderURL": "http://pastebin.com/Tg5hdRTM",
+        "Convex": true,
+        "MaterialIndex": 1,
+        "TypeIndex": 1,
+        "CustomShader": {
+          "SpecularColor": {
+            "r": 0.8745098,
+            "g": 0.8117647,
+            "b": 0.745098054
+          },
+          "SpecularIntensity": 0.0,
+          "SpecularSharpness": 3.0,
+          "FresnelStrength": 0.1
+        },
+        "CastShadows": true
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "f26eb1"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -8.251894,
+        "posY": -0.0261794329,
+        "posZ": 4.71132374,
+        "rotX": -2.29397642E-06,
+        "rotY": 359.985016,
+        "rotZ": 7.143454E-08,
+        "scaleX": 0.6428425,
+        "scaleY": 1.0,
+        "scaleZ": 0.6428425
+      },
+      "Nickname": "Systems Officer",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 24201,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "242": {
+          "FaceURL": "http://i.imgur.com/5l7OEHu.jpg",
+          "BackURL": "http://i.imgur.com/RqPuXy9.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "ca14b0"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -9.778446,
+        "posY": -0.0261793137,
+        "posZ": 4.684659,
+        "rotX": 4.07994048E-06,
+        "rotY": 359.916229,
+        "rotZ": -1.27796275E-05,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Hotshot Co-pilot",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 21803,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "218": {
+          "FaceURL": "http://i.imgur.com/cBT0l0y.jpg",
+          "BackURL": "http://i.imgur.com/hF6oWae.png",
+          "NumWidth": 2,
+          "NumHeight": 3,
+          "BackIsHidden": false,
+          "UniqueBack": true
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "dbc64b"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -9.70195,
+        "posY": -0.0261794329,
+        "posZ": 2.56802082,
+        "rotX": -4.67618565E-06,
+        "rotY": 359.99118,
+        "rotZ": -6.847781E-06,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Sensor Cluster",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 26600,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "266": {
+          "FaceURL": "http://i.imgur.com/prYU20e.jpg",
+          "BackURL": "http://i.imgur.com/CLQ10qz.jpg",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "a47fda"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -6.239382,
+        "posY": -0.0261795521,
+        "posZ": 4.753791,
+        "rotX": 7.09595361E-06,
+        "rotY": 359.990082,
+        "rotZ": -1.80223628E-06,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Anti-Pursuit Lasers",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 20102,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "201": {
+          "FaceURL": "http://i.imgur.com/QbxhN26.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1634615_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "212c6f"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -12.7868843,
+        "posY": -0.0224547386,
+        "posZ": 2.94848347,
+        "rotX": 0.13633199,
+        "rotY": -0.00503274146,
+        "rotZ": 0.000471025269,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "The Inquisitor",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 20261,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "202": {
+          "FaceURL": "http://img2.picload.org/image/wrgcipw/imp_pilot_cards.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic2624845_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "885b95"
+    },
+    {
+      "Name": "Custom_Model",
+      "Transform": {
+        "posX": -14.9374294,
+        "posY": -2.38418579E-07,
+        "posZ": -0.4260788,
+        "rotX": -9.392701E-06,
+        "rotY": 0.0189011022,
+        "rotZ": 7.39255256E-07,
+        "scaleX": 0.625,
+        "scaleY": 0.625,
+        "scaleZ": 0.625
+      },
+      "Nickname": "The Inquisitor",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.9999999,
+        "g": 0.9921603,
+        "b": 0.9999999
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CustomMesh": {
+        "MeshURL": "http://cloud-3.steamusercontent.com/ugc/82591194029089434/A4DA1AD96E4A6D65CC6AE4F745EDA966BA4EF85A/",
+        "DiffuseURL": "http://i.imgur.com/tIFByfl.jpg",
+        "NormalURL": "",
+        "ColliderURL": "http://cloud-3.steamusercontent.com/ugc/82591194029071339/41D4D10265D8B4B9FC1B0C640F9F8D94C816CE89/",
+        "Convex": true,
+        "MaterialIndex": 1,
+        "TypeIndex": 1,
+        "CustomShader": {
+          "SpecularColor": {
+            "r": 0.8745098,
+            "g": 0.8117647,
+            "b": 0.745098054
+          },
+          "SpecularIntensity": 0.0,
+          "SpecularSharpness": 3.0,
+          "FresnelStrength": 0.1
+        },
+        "CastShadows": true
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "6c97b4"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -6.18074036,
+        "posY": -0.0261794329,
+        "posZ": 6.95196056,
+        "rotX": 2.45505748E-06,
+        "rotY": 359.9774,
+        "rotZ": 2.60729826E-06,
+        "scaleX": 0.6428425,
+        "scaleY": 1.0,
+        "scaleZ": 0.6428425
+      },
+      "Nickname": "Kylo Ren's Shuttle",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 46501,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "465": {
+          "FaceURL": "http://cloud-3.steamusercontent.com/ugc/200804297981895929/30C525BF2601528A6372B93A8885DD808E8F4BBD/",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1634616_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "6371cc"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -15.15698,
+        "posY": -0.0225777626,
+        "posZ": 2.47170162,
+        "rotX": 0.211623579,
+        "rotY": 0.0124184173,
+        "rotZ": 4.59911753E-05,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Juke",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 22416,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "224": {
+          "FaceURL": "http://i.imgur.com/OykweiM.jpg",
+          "BackURL": "http://i.imgur.com/H69sETt.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "cec3a4"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -16.8928375,
+        "posY": -0.02250719,
+        "posZ": 2.43672085,
+        "rotX": 0.215807125,
+        "rotY": 359.989044,
+        "rotZ": 0.000109814486,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "TIE/v1",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 21232,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "212": {
+          "FaceURL": "http://i.imgur.com/mNSQb9j.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1634616_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "422072"
+    }
+  ],
+  "TabStates": {}
+}

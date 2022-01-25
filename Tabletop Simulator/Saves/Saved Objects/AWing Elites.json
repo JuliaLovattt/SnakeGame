@@ -1,0 +1,3336 @@
+{
+  "SaveName": "",
+  "GameMode": "",
+  "Date": "",
+  "Table": "",
+  "Sky": "",
+  "Note": "",
+  "Rules": "",
+  "PlayerTurn": "",
+  "LuaScript": "",
+  "LuaScriptState": "",
+  "ObjectStates": [
+    {
+      "Name": "Deck",
+      "Transform": {
+        "posX": -12.6831417,
+        "posY": 1.08620989,
+        "posZ": 14.1235514,
+        "rotX": -1.23819736E-05,
+        "rotY": 0.0106912581,
+        "rotZ": 180.0,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "SidewaysCard": false,
+      "DeckIDs": [
+        1102,
+        1102,
+        1102,
+        1107,
+        1106,
+        1111,
+        1112,
+        1110,
+        1105,
+        1113,
+        1114,
+        1109,
+        1104,
+        1101,
+        1108,
+        1103,
+        1115,
+        1100
+      ],
+      "CustomDeck": {
+        "11": {
+          "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+          "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "originPos = {}      -- position of the stack before laying out (left-bottom corner)\r\nx_half = 0          -- which half of table X-axis-wise we play on (+1 or -1)\r\nz_half = 0          -- which half of table Z-axis-wise we play on (+1 or -1)\r\nkNum = 1            -- koiogran turn counter (for layout)\r\n\r\n-- SPAWN FLIP AND LAYOUT BUTTONS\r\nfunction onLoad()\r\n    self.unlock()\r\n    local button = {}\r\n    button.click_function = 'init'\r\n    button.function_owner = self\r\n    button.label = 'Lay out'\r\n    button.position = {0, -0.5, 0}\r\n    button.rotation = {180, 180, 0}\r\n    button.width = 1500\r\n    button.height = 500\r\n    button.font_size = 300\r\n    self.createButton(button)\r\n    button.width = 1800\r\n    button.click_function = 'selfFlip'\r\n    button.label = 'Flip to start'\r\n    button.rotation = {0, 0, 0}\r\n    button.position = {0, 0.5, 0}\r\n    self.createButton(button)\r\nend\r\n\r\nfunction selfFlip()\r\n    local sRot = self.getRotation()\r\n    self.setRotation({sRot['x']+180, sRot['y']+180, sRot['z']})\r\nend\r\n\r\n-- RETURN POSITION BASED ON:\r\n-- -- DESCRIPTION (WHICH MOVE IT IS)\r\n-- -- \"TURN LEFT ZERO\" POSITION, OFFSET\r\n-- -- DIAL SPACING - DEPENDENT ON SCALE\r\nfunction decodePos(desc, te0pos, dialSpacing)\r\n    dir = nil\r\n    speed = nil\r\n    type = nil\r\n    if desc:sub(-1, -1) == 's' then\r\n        type = 'seg'\r\n        speed = tonumber(desc:sub(-2, -2))\r\n        dir = desc:sub(-3, -3)\r\n    elseif desc:sub(-1, -1) == 't' then\r\n        type = 'tal'\r\n        speed = tonumber(desc:sub(-2, -2))\r\n        dir = desc:sub(-3, -3)\r\n    elseif desc:sub(1, 1) == 'k' then\r\n        type = 'koi'\r\n        speed = tonumber(desc:sub(2, 2))\r\n        dir = 's'\r\n    elseif desc:sub(1, 1) == 's' then\r\n        type = 's'\r\n        speed = tonumber(desc:sub(2, 2))\r\n        dir = 's'\r\n    else\r\n        type = desc:sub(1, 1)\r\n        dir = desc:sub(2, 2)\r\n        speed = tonumber(desc:sub(3, 3))\r\n    end\r\n\r\n    outPos = {x=0, y=0.1, z=0}\r\n    outPos['z'] = speed * dialSpacing\r\n    if type == 's' then outPos['x'] = 0\r\n\r\n    elseif type == 'seg' or type == 'tal' then\r\n        if dir == 'r' then outPos['x'] = dialSpacing\r\n        else outPos['x'] = -1*dialSpacing end\r\n        outPos['z'] = 4*dialSpacing\r\n\r\n    elseif type == 'koi' then\r\n        if kNum == 1 or kNum == 2 then outPos['x'] = 2*dialSpacing\r\n        else outPos['x'] = -2*dialSpacing end\r\n        if kNum == 1 or kNum == 3 then outPos['z'] = 4*dialSpacing\r\n        else outPos['z'] = 5*dialSpacing end\r\n        kNum = kNum + 1\r\n\r\n    else\r\n        if type == 'b' then outPos['x'] = dialSpacing\r\n        elseif type == 't' then outPos['x'] = 2*dialSpacing\r\n        end\r\n\r\n        if dir == 'e' or dir == 'l' then outPos['x'] = outPos['x'] * -1 end\r\n    end\r\n\r\n    if z_half == 1 then\r\n        outPos['x'] = outPos['x'] * -1\r\n        outPos['y'] = outPos['y'] * -1\r\n        outPos['z'] = outPos['z'] * -1\r\n    end\r\n\r\n\r\n    outPos['x'] = outPos['x'] + te0pos['x'] - (2*dialSpacing*z_half)\r\n    outPos['y'] = outPos['y'] + te0pos['y']\r\n    outPos['z'] = outPos['z'] + te0pos['z']\r\n    return outPos\r\nend\r\n\r\nfunction offset(table1, table2)\r\n    return {table1[1]+table2[1], table1[2]+table2[2], table1[3]+table2[3]}\r\nend\r\n\r\n-- RETURN A ROTATION THAT IS NATURAL TO A PLAYER IN CERTAIN QUADRANT\r\n-- FACEUP OR FACEDOWN\r\nfunction correctQuadrantRotation(z_halfRot, faceup)\r\n    if z_halfRot > 0 then\r\n        if faceup == false then return {x=180, y=180, z=0}\r\n        else return {x=0, y=0, z=0} end\r\n    else\r\n        if faceup == false then return {x=180, y=0, z=0}\r\n        else return {x=0, y=180, z=0} end\r\n    end\r\nend\r\n\r\nfunction init()\r\n    self.setRotation(offset(self.getRotation(), {180, 180, 0}))\r\n    if(self.getPosition()[1] < 0) then x_half = -1 else x_half = 1 end\r\n    if(self.getPosition()[3] < 0) then z_half = -1 else z_half = 1 end\r\n    local dialSpacing = (2/0.625)*(self.getScale()[1])\r\n    self.setRotation(correctQuadrantRotation(z_half, false))\r\n    local te0pos = self.getPosition()\r\n    originPos = te0pos\r\n    local stackDials = self.getObjects()\r\n    local dialNum = 0\r\n    for k, dial in pairs(stackDials) do\r\n        if dial['description'] ~= 'spec' then\r\n            local dialPos = decodePos(dial['description'], te0pos, dialSpacing)\r\n            newDial = self.takeObject({position=dialPos, rotation=correctQuadrantRotation(z_half, true), guid=dial['guid']})\r\n            newDial.setPosition(dialPos)\r\n            newDial.setRotation(correctQuadrantRotation(z_half, true))\r\n        end\r\n    end\r\n    local spos = self.getPosition()\r\n    if z_half == -1 then self.setPosition({spos[1]+(3*dialSpacing), spos[2], spos[3]+(5*dialSpacing)})\r\n    else self.setPosition({spos[1]-(3*dialSpacing), spos[2], spos[3]-(5*dialSpacing)}) end\r\n    -- spawnResetButton()\r\n    self.destruct()\r\nend\r\n",
+      "LuaScriptState": "",
+      "ContainedObjects": [
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 28.3041077,
+            "posY": 1.03171349,
+            "posZ": -19.6720886,
+            "rotX": 2.04661443E-08,
+            "rotY": 180.000015,
+            "rotZ": 3.3179748E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "tr1",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1102,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "37525d"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 28.2207355,
+            "posY": 1.03171349,
+            "posZ": -22.55654,
+            "rotX": 2.04325623E-08,
+            "rotY": 180.000015,
+            "rotZ": 3.31793728E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "spec",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1102,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "3a9fbf"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 28.1521015,
+            "posY": 1.03246951,
+            "posZ": -25.3517456,
+            "rotX": 359.956024,
+            "rotY": 180.000031,
+            "rotZ": 0.0005414282,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "spec",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1102,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "0a975c"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 10.6471071,
+            "posY": 1.03171349,
+            "posZ": 16.8558311,
+            "rotX": -1.47883128E-07,
+            "rotY": 180.0295,
+            "rotZ": 4.43179715E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "tr2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1107,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "184dbb"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 8.546916,
+            "posY": 1.03171337,
+            "posZ": 16.86731,
+            "rotX": -1.9102076E-07,
+            "rotY": 179.97641,
+            "rotZ": 1.18137059E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "br2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1106,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "bc51c1"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 8.546916,
+            "posY": 1.03171337,
+            "posZ": 18.96731,
+            "rotX": -7.26667864E-08,
+            "rotY": 180.025665,
+            "rotZ": -2.47989518E-09,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "br3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1111,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "64459e"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 10.6469154,
+            "posY": 1.03171337,
+            "posZ": 18.96731,
+            "rotX": 1.50312914E-07,
+            "rotY": 180.00058,
+            "rotZ": -1.66114063E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "tr3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1112,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "e32deb"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.446912,
+            "posY": 1.03171349,
+            "posZ": 18.9673157,
+            "rotX": 4.9422174E-06,
+            "rotY": 180.029633,
+            "rotZ": -1.8286579E-06,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1110,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "d85316"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.44691563,
+            "posY": 1.03171349,
+            "posZ": 16.86731,
+            "rotX": -8.833372E-08,
+            "rotY": 179.9708,
+            "rotZ": -3.95146564E-08,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1105,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "a41274"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 10.6469154,
+            "posY": 1.03171349,
+            "posZ": 21.06731,
+            "rotX": -5.688683E-08,
+            "rotY": 180.032883,
+            "rotZ": 6.957442E-09,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "k3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1113,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "267840"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.44691563,
+            "posY": 1.03171349,
+            "posZ": 21.06731,
+            "rotX": -2.0923542E-08,
+            "rotY": 180.00499,
+            "rotZ": 3.85893E-08,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s4",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1114,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "fbd13d"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 4.350501,
+            "posY": 1.14257932,
+            "posZ": 18.9655724,
+            "rotX": -0.000424303842,
+            "rotY": 180.179626,
+            "rotZ": 6.681902,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "be3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1109,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "59c32c"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 4.344207,
+            "posY": 1.14278257,
+            "posZ": 16.866375,
+            "rotX": -0.001705115,
+            "rotY": 180.02536,
+            "rotZ": 6.6946907,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "be2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1104,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "965064"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 3.31091785,
+            "posY": 1.03171349,
+            "posZ": 14.7652264,
+            "rotX": 4.079697E-08,
+            "rotY": 179.985764,
+            "rotZ": -2.47180676E-08,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "te1",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1101,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "7f2de7"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 2.24715424,
+            "posY": 1.17206049,
+            "posZ": 18.97317,
+            "rotX": 351.682831,
+            "rotY": 180.062073,
+            "rotZ": 359.9921,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "te3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1108,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "d22f01"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 2.246916,
+            "posY": 1.2451576,
+            "posZ": 16.86731,
+            "rotX": -2.7246233E-06,
+            "rotY": 179.985687,
+            "rotZ": 3.72416338E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "te2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1103,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "70fd3f"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.44691563,
+            "posY": 1.03171337,
+            "posZ": 23.1673088,
+            "rotX": -1.02524631E-07,
+            "rotY": 179.961838,
+            "rotZ": 1.18798732E-06,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s5",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1115,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "189e5b"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 8.546916,
+            "posY": 1.03171349,
+            "posZ": 23.1673088,
+            "rotX": 1.57461244E-07,
+            "rotY": 180.032867,
+            "rotZ": -1.481911E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "k5",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1100,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "c7aa74"
+        }
+      ],
+      "GUID": "fbf607"
+    },
+    {
+      "Name": "Custom_Model",
+      "Transform": {
+        "posX": -1.51673794,
+        "posY": -0.0354254246,
+        "posZ": 4.14778233,
+        "rotX": 1.28124753E-07,
+        "rotY": 359.9578,
+        "rotZ": -2.10624676E-05,
+        "scaleX": 0.625,
+        "scaleY": 0.625,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Gemmer Sojan",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.9999998,
+        "g": 0.992160261,
+        "b": 0.9999998
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CustomMesh": {
+        "MeshURL": "http://cloud-3.steamusercontent.com/ugc/82591194029101910/5B04878FCA189712681D1CF6C92F8CD178668FD2/",
+        "DiffuseURL": "http://i.imgur.com/iS3L5eo.jpg",
+        "NormalURL": "",
+        "ColliderURL": "http://cloud-3.steamusercontent.com/ugc/82591194029083698/41D4D10265D8B4B9FC1B0C640F9F8D94C816CE89/",
+        "Convex": true,
+        "MaterialIndex": 1,
+        "TypeIndex": 1,
+        "CustomShader": {
+          "SpecularColor": {
+            "r": 0.8745098,
+            "g": 0.8117647,
+            "b": 0.745098054
+          },
+          "SpecularIntensity": 0.0,
+          "SpecularSharpness": 3.0,
+          "FresnelStrength": 0.1
+        },
+        "CastShadows": true
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "f333c0"
+    },
+    {
+      "Name": "Deck",
+      "Transform": {
+        "posX": -8.105328,
+        "posY": 1.1920929E-07,
+        "posZ": -1.10907078,
+        "rotX": -3.860466E-06,
+        "rotY": 0.0106886039,
+        "rotZ": 180.0,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "SidewaysCard": false,
+      "DeckIDs": [
+        1102,
+        1102,
+        1102,
+        1107,
+        1106,
+        1111,
+        1112,
+        1110,
+        1105,
+        1113,
+        1114,
+        1109,
+        1104,
+        1101,
+        1108,
+        1103,
+        1115,
+        1100
+      ],
+      "CustomDeck": {
+        "11": {
+          "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+          "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "originPos = {}      -- position of the stack before laying out (left-bottom corner)\r\nx_half = 0          -- which half of table X-axis-wise we play on (+1 or -1)\r\nz_half = 0          -- which half of table Z-axis-wise we play on (+1 or -1)\r\nkNum = 1            -- koiogran turn counter (for layout)\r\n\r\n-- SPAWN FLIP AND LAYOUT BUTTONS\r\nfunction onLoad()\r\n    self.unlock()\r\n    local button = {}\r\n    button.click_function = 'init'\r\n    button.function_owner = self\r\n    button.label = 'Lay out'\r\n    button.position = {0, -0.5, 0}\r\n    button.rotation = {180, 180, 0}\r\n    button.width = 1500\r\n    button.height = 500\r\n    button.font_size = 300\r\n    self.createButton(button)\r\n    button.width = 1800\r\n    button.click_function = 'selfFlip'\r\n    button.label = 'Flip to start'\r\n    button.rotation = {0, 0, 0}\r\n    button.position = {0, 0.5, 0}\r\n    self.createButton(button)\r\nend\r\n\r\nfunction selfFlip()\r\n    local sRot = self.getRotation()\r\n    self.setRotation({sRot['x']+180, sRot['y']+180, sRot['z']})\r\nend\r\n\r\n-- RETURN POSITION BASED ON:\r\n-- -- DESCRIPTION (WHICH MOVE IT IS)\r\n-- -- \"TURN LEFT ZERO\" POSITION, OFFSET\r\n-- -- DIAL SPACING - DEPENDENT ON SCALE\r\nfunction decodePos(desc, te0pos, dialSpacing)\r\n    dir = nil\r\n    speed = nil\r\n    type = nil\r\n    if desc:sub(-1, -1) == 's' then\r\n        type = 'seg'\r\n        speed = tonumber(desc:sub(-2, -2))\r\n        dir = desc:sub(-3, -3)\r\n    elseif desc:sub(-1, -1) == 't' then\r\n        type = 'tal'\r\n        speed = tonumber(desc:sub(-2, -2))\r\n        dir = desc:sub(-3, -3)\r\n    elseif desc:sub(1, 1) == 'k' then\r\n        type = 'koi'\r\n        speed = tonumber(desc:sub(2, 2))\r\n        dir = 's'\r\n    elseif desc:sub(1, 1) == 's' then\r\n        type = 's'\r\n        speed = tonumber(desc:sub(2, 2))\r\n        dir = 's'\r\n    else\r\n        type = desc:sub(1, 1)\r\n        dir = desc:sub(2, 2)\r\n        speed = tonumber(desc:sub(3, 3))\r\n    end\r\n\r\n    outPos = {x=0, y=0.1, z=0}\r\n    outPos['z'] = speed * dialSpacing\r\n    if type == 's' then outPos['x'] = 0\r\n\r\n    elseif type == 'seg' or type == 'tal' then\r\n        if dir == 'r' then outPos['x'] = dialSpacing\r\n        else outPos['x'] = -1*dialSpacing end\r\n        outPos['z'] = 4*dialSpacing\r\n\r\n    elseif type == 'koi' then\r\n        if kNum == 1 or kNum == 2 then outPos['x'] = 2*dialSpacing\r\n        else outPos['x'] = -2*dialSpacing end\r\n        if kNum == 1 or kNum == 3 then outPos['z'] = 4*dialSpacing\r\n        else outPos['z'] = 5*dialSpacing end\r\n        kNum = kNum + 1\r\n\r\n    else\r\n        if type == 'b' then outPos['x'] = dialSpacing\r\n        elseif type == 't' then outPos['x'] = 2*dialSpacing\r\n        end\r\n\r\n        if dir == 'e' or dir == 'l' then outPos['x'] = outPos['x'] * -1 end\r\n    end\r\n\r\n    if z_half == 1 then\r\n        outPos['x'] = outPos['x'] * -1\r\n        outPos['y'] = outPos['y'] * -1\r\n        outPos['z'] = outPos['z'] * -1\r\n    end\r\n\r\n\r\n    outPos['x'] = outPos['x'] + te0pos['x'] - (2*dialSpacing*z_half)\r\n    outPos['y'] = outPos['y'] + te0pos['y']\r\n    outPos['z'] = outPos['z'] + te0pos['z']\r\n    return outPos\r\nend\r\n\r\nfunction offset(table1, table2)\r\n    return {table1[1]+table2[1], table1[2]+table2[2], table1[3]+table2[3]}\r\nend\r\n\r\n-- RETURN A ROTATION THAT IS NATURAL TO A PLAYER IN CERTAIN QUADRANT\r\n-- FACEUP OR FACEDOWN\r\nfunction correctQuadrantRotation(z_halfRot, faceup)\r\n    if z_halfRot > 0 then\r\n        if faceup == false then return {x=180, y=180, z=0}\r\n        else return {x=0, y=0, z=0} end\r\n    else\r\n        if faceup == false then return {x=180, y=0, z=0}\r\n        else return {x=0, y=180, z=0} end\r\n    end\r\nend\r\n\r\nfunction init()\r\n    self.setRotation(offset(self.getRotation(), {180, 180, 0}))\r\n    if(self.getPosition()[1] < 0) then x_half = -1 else x_half = 1 end\r\n    if(self.getPosition()[3] < 0) then z_half = -1 else z_half = 1 end\r\n    local dialSpacing = (2/0.625)*(self.getScale()[1])\r\n    self.setRotation(correctQuadrantRotation(z_half, false))\r\n    local te0pos = self.getPosition()\r\n    originPos = te0pos\r\n    local stackDials = self.getObjects()\r\n    local dialNum = 0\r\n    for k, dial in pairs(stackDials) do\r\n        if dial['description'] ~= 'spec' then\r\n            local dialPos = decodePos(dial['description'], te0pos, dialSpacing)\r\n            newDial = self.takeObject({position=dialPos, rotation=correctQuadrantRotation(z_half, true), guid=dial['guid']})\r\n            newDial.setPosition(dialPos)\r\n            newDial.setRotation(correctQuadrantRotation(z_half, true))\r\n        end\r\n    end\r\n    local spos = self.getPosition()\r\n    if z_half == -1 then self.setPosition({spos[1]+(3*dialSpacing), spos[2], spos[3]+(5*dialSpacing)})\r\n    else self.setPosition({spos[1]-(3*dialSpacing), spos[2], spos[3]-(5*dialSpacing)}) end\r\n    -- spawnResetButton()\r\n    self.destruct()\r\nend\r\n",
+      "LuaScriptState": "",
+      "ContainedObjects": [
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 28.3041077,
+            "posY": 1.03171349,
+            "posZ": -19.6720886,
+            "rotX": 2.04661443E-08,
+            "rotY": 180.000015,
+            "rotZ": 3.3179748E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "tr1",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1102,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "37525d"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 28.2207355,
+            "posY": 1.03171349,
+            "posZ": -22.55654,
+            "rotX": 2.04325623E-08,
+            "rotY": 180.000015,
+            "rotZ": 3.31793728E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "spec",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1102,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "3a9fbf"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 28.1521015,
+            "posY": 1.03246951,
+            "posZ": -25.3517456,
+            "rotX": 359.956024,
+            "rotY": 180.000031,
+            "rotZ": 0.0005414282,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "spec",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1102,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "0a975c"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 10.6471071,
+            "posY": 1.03171349,
+            "posZ": 16.8558311,
+            "rotX": -1.47883128E-07,
+            "rotY": 180.0295,
+            "rotZ": 4.43179715E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "tr2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1107,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "184dbb"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 8.546916,
+            "posY": 1.03171337,
+            "posZ": 16.86731,
+            "rotX": -1.9102076E-07,
+            "rotY": 179.97641,
+            "rotZ": 1.18137059E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "br2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1106,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "bc51c1"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 8.546916,
+            "posY": 1.03171337,
+            "posZ": 18.96731,
+            "rotX": -7.26667864E-08,
+            "rotY": 180.025665,
+            "rotZ": -2.47989518E-09,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "br3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1111,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "64459e"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 10.6469154,
+            "posY": 1.03171337,
+            "posZ": 18.96731,
+            "rotX": 1.50312914E-07,
+            "rotY": 180.00058,
+            "rotZ": -1.66114063E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "tr3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1112,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "e32deb"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.446912,
+            "posY": 1.03171349,
+            "posZ": 18.9673157,
+            "rotX": 4.9422174E-06,
+            "rotY": 180.029633,
+            "rotZ": -1.8286579E-06,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1110,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "d85316"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.44691563,
+            "posY": 1.03171349,
+            "posZ": 16.86731,
+            "rotX": -8.833372E-08,
+            "rotY": 179.9708,
+            "rotZ": -3.95146564E-08,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1105,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "a41274"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 10.6469154,
+            "posY": 1.03171349,
+            "posZ": 21.06731,
+            "rotX": -5.688683E-08,
+            "rotY": 180.032883,
+            "rotZ": 6.957442E-09,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "k3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1113,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "267840"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.44691563,
+            "posY": 1.03171349,
+            "posZ": 21.06731,
+            "rotX": -2.0923542E-08,
+            "rotY": 180.00499,
+            "rotZ": 3.85893E-08,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s4",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1114,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "fbd13d"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 4.350501,
+            "posY": 1.14257932,
+            "posZ": 18.9655724,
+            "rotX": -0.000424303842,
+            "rotY": 180.179626,
+            "rotZ": 6.681902,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "be3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1109,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "59c32c"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 4.344207,
+            "posY": 1.14278257,
+            "posZ": 16.866375,
+            "rotX": -0.001705115,
+            "rotY": 180.02536,
+            "rotZ": 6.6946907,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "be2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1104,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "965064"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 3.31091785,
+            "posY": 1.03171349,
+            "posZ": 14.7652264,
+            "rotX": 4.079697E-08,
+            "rotY": 179.985764,
+            "rotZ": -2.47180676E-08,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "te1",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1101,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "7f2de7"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 2.24715424,
+            "posY": 1.17206049,
+            "posZ": 18.97317,
+            "rotX": 351.682831,
+            "rotY": 180.062073,
+            "rotZ": 359.9921,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "te3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1108,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "d22f01"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 2.246916,
+            "posY": 1.2451576,
+            "posZ": 16.86731,
+            "rotX": -2.7246233E-06,
+            "rotY": 179.985687,
+            "rotZ": 3.72416338E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "te2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1103,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "70fd3f"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.44691563,
+            "posY": 1.03171337,
+            "posZ": 23.1673088,
+            "rotX": -1.02524631E-07,
+            "rotY": 179.961838,
+            "rotZ": 1.18798732E-06,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s5",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1115,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "189e5b"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 8.546916,
+            "posY": 1.03171349,
+            "posZ": 23.1673088,
+            "rotX": 1.57461244E-07,
+            "rotY": 180.032867,
+            "rotZ": -1.481911E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "k5",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1100,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "c7aa74"
+        }
+      ],
+      "GUID": "49b614"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -7.607565,
+        "posY": -0.05449629,
+        "posZ": 6.781911,
+        "rotX": -4.09694758E-06,
+        "rotY": 359.95285,
+        "rotZ": 6.194839E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Jake Farrell",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 20718,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "207": {
+          "FaceURL": "http://picload.org/image/wrpcwwi/httpwwwfotoshochladennetupload.jpg",
+          "BackURL": "http://i.imgur.com/z8o2eox.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "82ecaf"
+    },
+    {
+      "Name": "Custom_Model",
+      "Transform": {
+        "posX": -8.525925,
+        "posY": -0.0304020643,
+        "posZ": 2.965211,
+        "rotX": 0.3446983,
+        "rotY": 8.891879,
+        "rotZ": 0.0539290272,
+        "scaleX": 0.625,
+        "scaleY": 0.625,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Jake Farrell",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.9999998,
+        "g": 0.992160261,
+        "b": 0.9999998
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CustomMesh": {
+        "MeshURL": "http://cloud-3.steamusercontent.com/ugc/82591194029092256/19939432DC769A3B77BA19F2541C9EA11B72C73B/",
+        "DiffuseURL": "http://i.imgur.com/RRpT9B5.jpg",
+        "NormalURL": "",
+        "ColliderURL": "http://cloud-3.steamusercontent.com/ugc/82591194029083698/41D4D10265D8B4B9FC1B0C640F9F8D94C816CE89/",
+        "Convex": true,
+        "MaterialIndex": 1,
+        "TypeIndex": 1,
+        "CustomShader": {
+          "SpecularColor": {
+            "r": 0.8745098,
+            "g": 0.8117647,
+            "b": 0.745098054
+          },
+          "SpecularIntensity": 0.0,
+          "SpecularSharpness": 3.0,
+          "FresnelStrength": 0.1
+        },
+        "CastShadows": true
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "8ba924"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -2.30950546,
+        "posY": -0.0544964075,
+        "posZ": 7.17935276,
+        "rotX": -2.514146E-06,
+        "rotY": 0.0106373178,
+        "rotZ": 1.89705588E-06,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Stealth Device",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 20118,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "201": {
+          "FaceURL": "http://i.imgur.com/QbxhN26.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1634615_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "47d0dd"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -9.718683,
+        "posY": -0.05449629,
+        "posZ": 6.2936964,
+        "rotX": -2.22024937E-06,
+        "rotY": 0.00333994115,
+        "rotZ": -4.96217444E-06,
+        "scaleX": 0.6428425,
+        "scaleY": 1.0,
+        "scaleZ": 0.6428425
+      },
+      "Nickname": "Swarm Leader",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 47501,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "475": {
+          "FaceURL": "http://cloud-3.steamusercontent.com/ugc/200804896212924002/48B168A7F6D65E40E348B1256041F8710B47A713/",
+          "BackURL": "http://cloud-3.steamusercontent.com/ugc/200804896212924271/3D67739DFD00047BB54C8CB13FD626BFBF1D2D43/",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": true
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "363222"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -0.418293953,
+        "posY": -0.0544964075,
+        "posZ": 7.31638432,
+        "rotX": 1.2915375E-06,
+        "rotY": 0.0141672418,
+        "rotZ": -4.78581967E-07,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Proton Rockets",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 14707,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "147": {
+          "FaceURL": "http://i.imgur.com/N9zKEQX.jpg",
+          "BackURL": "http://i.imgur.com/ufO0Zmu.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "e82d20"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": 1.64175987,
+        "posY": -0.05449629,
+        "posZ": 7.82477665,
+        "rotX": -2.72735974E-06,
+        "rotY": 359.9692,
+        "rotZ": -3.30711E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Gemmer Sojan",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 20716,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "207": {
+          "FaceURL": "http://picload.org/image/wrpcwwi/httpwwwfotoshochladennetupload.jpg",
+          "BackURL": "http://i.imgur.com/z8o2eox.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "616afb"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -9.799778,
+        "posY": -0.05449617,
+        "posZ": 8.436326,
+        "rotX": 1.02862984E-07,
+        "rotY": 359.992432,
+        "rotZ": -7.637251E-06,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "A-Wing Test Pilot",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 21204,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "212": {
+          "FaceURL": "http://i.imgur.com/mNSQb9j.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1634616_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "3614a8"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -11.3510742,
+        "posY": -0.05449617,
+        "posZ": 6.37056255,
+        "rotX": 1.18718856E-06,
+        "rotY": 0.0141492169,
+        "rotZ": -1.43001614E-07,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Proton Rockets",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 14707,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "147": {
+          "FaceURL": "http://i.imgur.com/N9zKEQX.jpg",
+          "BackURL": "http://i.imgur.com/ufO0Zmu.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "2390fd"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -11.3565369,
+        "posY": -0.0544964075,
+        "posZ": 8.436282,
+        "rotX": 1.75626428E-06,
+        "rotY": 0.0332373381,
+        "rotZ": -3.22888786E-06,
+        "scaleX": 0.575,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Snap Shot",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 26209,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "262": {
+          "FaceURL": "http://i.imgur.com/xZyJg4U.png",
+          "BackURL": "http://i.imgur.com/1EYU9ri.jpg",
+          "NumWidth": 10,
+          "NumHeight": 2,
+          "BackIsHidden": false,
+          "UniqueBack": true
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "a6c97e"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -0.430073738,
+        "posY": -0.05449617,
+        "posZ": 9.305404,
+        "rotX": -1.12250734E-06,
+        "rotY": 359.992432,
+        "rotZ": -2.75665428E-07,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "A-Wing Test Pilot",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 21204,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "212": {
+          "FaceURL": "http://i.imgur.com/mNSQb9j.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1634616_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "cfdf35"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -2.29576015,
+        "posY": -0.0544964075,
+        "posZ": 9.396735,
+        "rotX": 1.75299917E-07,
+        "rotY": 359.9875,
+        "rotZ": -6.08472845E-08,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Veteran Instincts",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 22428,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "224": {
+          "FaceURL": "http://i.imgur.com/OykweiM.jpg",
+          "BackURL": "http://i.imgur.com/H69sETt.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "a1f9a6"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -12.897644,
+        "posY": -0.05449629,
+        "posZ": 6.530484,
+        "rotX": -5.942691E-06,
+        "rotY": 0.0106289862,
+        "rotZ": 7.142336E-06,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Stealth Device",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 20118,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "201": {
+          "FaceURL": "http://i.imgur.com/QbxhN26.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1634615_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "db6178"
+    },
+    {
+      "Name": "Deck",
+      "Transform": {
+        "posX": -14.7523994,
+        "posY": -1.1920929E-07,
+        "posZ": -1.823143,
+        "rotX": -1.47597184E-05,
+        "rotY": 0.01444414,
+        "rotZ": 180.0,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "SidewaysCard": false,
+      "DeckIDs": [
+        1102,
+        1102,
+        1102,
+        1107,
+        1106,
+        1111,
+        1112,
+        1110,
+        1105,
+        1113,
+        1114,
+        1109,
+        1104,
+        1101,
+        1108,
+        1103,
+        1115,
+        1100
+      ],
+      "CustomDeck": {
+        "11": {
+          "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+          "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "originPos = {}      -- position of the stack before laying out (left-bottom corner)\r\nx_half = 0          -- which half of table X-axis-wise we play on (+1 or -1)\r\nz_half = 0          -- which half of table Z-axis-wise we play on (+1 or -1)\r\nkNum = 1            -- koiogran turn counter (for layout)\r\n\r\n-- SPAWN FLIP AND LAYOUT BUTTONS\r\nfunction onLoad()\r\n    self.unlock()\r\n    local button = {}\r\n    button.click_function = 'init'\r\n    button.function_owner = self\r\n    button.label = 'Lay out'\r\n    button.position = {0, -0.5, 0}\r\n    button.rotation = {180, 180, 0}\r\n    button.width = 1500\r\n    button.height = 500\r\n    button.font_size = 300\r\n    self.createButton(button)\r\n    button.width = 1800\r\n    button.click_function = 'selfFlip'\r\n    button.label = 'Flip to start'\r\n    button.rotation = {0, 0, 0}\r\n    button.position = {0, 0.5, 0}\r\n    self.createButton(button)\r\nend\r\n\r\nfunction selfFlip()\r\n    local sRot = self.getRotation()\r\n    self.setRotation({sRot['x']+180, sRot['y']+180, sRot['z']})\r\nend\r\n\r\n-- RETURN POSITION BASED ON:\r\n-- -- DESCRIPTION (WHICH MOVE IT IS)\r\n-- -- \"TURN LEFT ZERO\" POSITION, OFFSET\r\n-- -- DIAL SPACING - DEPENDENT ON SCALE\r\nfunction decodePos(desc, te0pos, dialSpacing)\r\n    dir = nil\r\n    speed = nil\r\n    type = nil\r\n    if desc:sub(-1, -1) == 's' then\r\n        type = 'seg'\r\n        speed = tonumber(desc:sub(-2, -2))\r\n        dir = desc:sub(-3, -3)\r\n    elseif desc:sub(-1, -1) == 't' then\r\n        type = 'tal'\r\n        speed = tonumber(desc:sub(-2, -2))\r\n        dir = desc:sub(-3, -3)\r\n    elseif desc:sub(1, 1) == 'k' then\r\n        type = 'koi'\r\n        speed = tonumber(desc:sub(2, 2))\r\n        dir = 's'\r\n    elseif desc:sub(1, 1) == 's' then\r\n        type = 's'\r\n        speed = tonumber(desc:sub(2, 2))\r\n        dir = 's'\r\n    else\r\n        type = desc:sub(1, 1)\r\n        dir = desc:sub(2, 2)\r\n        speed = tonumber(desc:sub(3, 3))\r\n    end\r\n\r\n    outPos = {x=0, y=0.1, z=0}\r\n    outPos['z'] = speed * dialSpacing\r\n    if type == 's' then outPos['x'] = 0\r\n\r\n    elseif type == 'seg' or type == 'tal' then\r\n        if dir == 'r' then outPos['x'] = dialSpacing\r\n        else outPos['x'] = -1*dialSpacing end\r\n        outPos['z'] = 4*dialSpacing\r\n\r\n    elseif type == 'koi' then\r\n        if kNum == 1 or kNum == 2 then outPos['x'] = 2*dialSpacing\r\n        else outPos['x'] = -2*dialSpacing end\r\n        if kNum == 1 or kNum == 3 then outPos['z'] = 4*dialSpacing\r\n        else outPos['z'] = 5*dialSpacing end\r\n        kNum = kNum + 1\r\n\r\n    else\r\n        if type == 'b' then outPos['x'] = dialSpacing\r\n        elseif type == 't' then outPos['x'] = 2*dialSpacing\r\n        end\r\n\r\n        if dir == 'e' or dir == 'l' then outPos['x'] = outPos['x'] * -1 end\r\n    end\r\n\r\n    if z_half == 1 then\r\n        outPos['x'] = outPos['x'] * -1\r\n        outPos['y'] = outPos['y'] * -1\r\n        outPos['z'] = outPos['z'] * -1\r\n    end\r\n\r\n\r\n    outPos['x'] = outPos['x'] + te0pos['x'] - (2*dialSpacing*z_half)\r\n    outPos['y'] = outPos['y'] + te0pos['y']\r\n    outPos['z'] = outPos['z'] + te0pos['z']\r\n    return outPos\r\nend\r\n\r\nfunction offset(table1, table2)\r\n    return {table1[1]+table2[1], table1[2]+table2[2], table1[3]+table2[3]}\r\nend\r\n\r\n-- RETURN A ROTATION THAT IS NATURAL TO A PLAYER IN CERTAIN QUADRANT\r\n-- FACEUP OR FACEDOWN\r\nfunction correctQuadrantRotation(z_halfRot, faceup)\r\n    if z_halfRot > 0 then\r\n        if faceup == false then return {x=180, y=180, z=0}\r\n        else return {x=0, y=0, z=0} end\r\n    else\r\n        if faceup == false then return {x=180, y=0, z=0}\r\n        else return {x=0, y=180, z=0} end\r\n    end\r\nend\r\n\r\nfunction init()\r\n    self.setRotation(offset(self.getRotation(), {180, 180, 0}))\r\n    if(self.getPosition()[1] < 0) then x_half = -1 else x_half = 1 end\r\n    if(self.getPosition()[3] < 0) then z_half = -1 else z_half = 1 end\r\n    local dialSpacing = (2/0.625)*(self.getScale()[1])\r\n    self.setRotation(correctQuadrantRotation(z_half, false))\r\n    local te0pos = self.getPosition()\r\n    originPos = te0pos\r\n    local stackDials = self.getObjects()\r\n    local dialNum = 0\r\n    for k, dial in pairs(stackDials) do\r\n        if dial['description'] ~= 'spec' then\r\n            local dialPos = decodePos(dial['description'], te0pos, dialSpacing)\r\n            newDial = self.takeObject({position=dialPos, rotation=correctQuadrantRotation(z_half, true), guid=dial['guid']})\r\n            newDial.setPosition(dialPos)\r\n            newDial.setRotation(correctQuadrantRotation(z_half, true))\r\n        end\r\n    end\r\n    local spos = self.getPosition()\r\n    if z_half == -1 then self.setPosition({spos[1]+(3*dialSpacing), spos[2], spos[3]+(5*dialSpacing)})\r\n    else self.setPosition({spos[1]-(3*dialSpacing), spos[2], spos[3]-(5*dialSpacing)}) end\r\n    -- spawnResetButton()\r\n    self.destruct()\r\nend\r\n",
+      "LuaScriptState": "",
+      "ContainedObjects": [
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 28.3041077,
+            "posY": 1.03171349,
+            "posZ": -19.6720886,
+            "rotX": 2.04661443E-08,
+            "rotY": 180.000015,
+            "rotZ": 3.3179748E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "tr1",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1102,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "37525d"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 28.2207355,
+            "posY": 1.03171349,
+            "posZ": -22.55654,
+            "rotX": 2.04325623E-08,
+            "rotY": 180.000015,
+            "rotZ": 3.31793728E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "spec",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1102,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "3a9fbf"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 28.1521015,
+            "posY": 1.03246951,
+            "posZ": -25.3517456,
+            "rotX": 359.956024,
+            "rotY": 180.000031,
+            "rotZ": 0.0005414282,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "spec",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1102,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "0a975c"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 10.6471071,
+            "posY": 1.03171349,
+            "posZ": 16.8558311,
+            "rotX": -1.47883128E-07,
+            "rotY": 180.0295,
+            "rotZ": 4.43179715E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "tr2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1107,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "184dbb"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 8.546916,
+            "posY": 1.03171337,
+            "posZ": 16.86731,
+            "rotX": -1.9102076E-07,
+            "rotY": 179.97641,
+            "rotZ": 1.18137059E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "br2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1106,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "bc51c1"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 8.546916,
+            "posY": 1.03171337,
+            "posZ": 18.96731,
+            "rotX": -7.26667864E-08,
+            "rotY": 180.025665,
+            "rotZ": -2.47989518E-09,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "br3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1111,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "64459e"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 10.6469154,
+            "posY": 1.03171337,
+            "posZ": 18.96731,
+            "rotX": 1.50312914E-07,
+            "rotY": 180.00058,
+            "rotZ": -1.66114063E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "tr3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1112,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "e32deb"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.446912,
+            "posY": 1.03171349,
+            "posZ": 18.9673157,
+            "rotX": 4.9422174E-06,
+            "rotY": 180.029633,
+            "rotZ": -1.8286579E-06,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1110,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "d85316"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.44691563,
+            "posY": 1.03171349,
+            "posZ": 16.86731,
+            "rotX": -8.833372E-08,
+            "rotY": 179.9708,
+            "rotZ": -3.95146564E-08,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1105,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "a41274"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 10.6469154,
+            "posY": 1.03171349,
+            "posZ": 21.06731,
+            "rotX": -5.688683E-08,
+            "rotY": 180.032883,
+            "rotZ": 6.957442E-09,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "k3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1113,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "267840"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.44691563,
+            "posY": 1.03171349,
+            "posZ": 21.06731,
+            "rotX": -2.0923542E-08,
+            "rotY": 180.00499,
+            "rotZ": 3.85893E-08,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s4",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1114,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "fbd13d"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 4.350501,
+            "posY": 1.14257932,
+            "posZ": 18.9655724,
+            "rotX": -0.000424303842,
+            "rotY": 180.179626,
+            "rotZ": 6.681902,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "be3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1109,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "59c32c"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 4.344207,
+            "posY": 1.14278257,
+            "posZ": 16.866375,
+            "rotX": -0.001705115,
+            "rotY": 180.02536,
+            "rotZ": 6.6946907,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "be2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1104,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "965064"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 3.31091785,
+            "posY": 1.03171349,
+            "posZ": 14.7652264,
+            "rotX": 4.079697E-08,
+            "rotY": 179.985764,
+            "rotZ": -2.47180676E-08,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "",
+          "Description": "te1",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1101,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "7f2de7"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 2.24715424,
+            "posY": 1.17206049,
+            "posZ": 18.97317,
+            "rotX": 351.682831,
+            "rotY": 180.062073,
+            "rotZ": 359.9921,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "te3",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1108,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "d22f01"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 2.246916,
+            "posY": 1.2451576,
+            "posZ": 16.86731,
+            "rotX": -2.7246233E-06,
+            "rotY": 179.985687,
+            "rotZ": 3.72416338E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "te2",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1103,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "70fd3f"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 6.44691563,
+            "posY": 1.03171337,
+            "posZ": 23.1673088,
+            "rotX": -1.02524631E-07,
+            "rotY": 179.961838,
+            "rotZ": 1.18798732E-06,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "s5",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1115,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "189e5b"
+        },
+        {
+          "Name": "Card",
+          "Transform": {
+            "posX": 8.546916,
+            "posY": 1.03171349,
+            "posZ": 23.1673088,
+            "rotX": 1.57461244E-07,
+            "rotY": 180.032867,
+            "rotZ": -1.481911E-07,
+            "scaleX": 0.625,
+            "scaleY": 1.0,
+            "scaleZ": 0.625
+          },
+          "Nickname": "Zeta Sq. Pilot",
+          "Description": "k5",
+          "ColorDiffuse": {
+            "r": 0.713235259,
+            "g": 0.713235259,
+            "b": 0.713235259
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "CardID": 1100,
+          "SidewaysCard": false,
+          "CustomDeck": {
+            "11": {
+              "FaceURL": "http://img4.fotos-hochladen.net/uploads/awradnvf02iwk9c.jpg",
+              "BackURL": "http://img4.fotos-hochladen.net/uploads/radawback256muyk9rw.jpg",
+              "NumWidth": 10,
+              "NumHeight": 7,
+              "BackIsHidden": false,
+              "UniqueBack": false
+            }
+          },
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "c7aa74"
+        }
+      ],
+      "GUID": "03271f"
+    },
+    {
+      "Name": "Custom_Model",
+      "Transform": {
+        "posX": -15.7671413,
+        "posY": -0.0304336548,
+        "posZ": 2.92846966,
+        "rotX": 0.396084756,
+        "rotY": 0.00112269563,
+        "rotZ": -5.611564E-06,
+        "scaleX": 0.625,
+        "scaleY": 0.625,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Tycho Celchu",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.9999998,
+        "g": 0.992160261,
+        "b": 0.9999998
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CustomMesh": {
+        "MeshURL": "http://cloud-3.steamusercontent.com/ugc/82591194029101910/5B04878FCA189712681D1CF6C92F8CD178668FD2/",
+        "DiffuseURL": "http://i.imgur.com/oIQU00Q.jpg",
+        "NormalURL": "",
+        "ColliderURL": "http://cloud-3.steamusercontent.com/ugc/82591194029083698/41D4D10265D8B4B9FC1B0C640F9F8D94C816CE89/",
+        "Convex": true,
+        "MaterialIndex": 1,
+        "TypeIndex": 1,
+        "CustomShader": {
+          "SpecularColor": {
+            "r": 0.8745098,
+            "g": 0.8117647,
+            "b": 0.745098054
+          },
+          "SpecularIntensity": 0.0,
+          "SpecularSharpness": 3.0,
+          "FresnelStrength": 0.1
+        },
+        "CastShadows": true
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "401895"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -15.9227142,
+        "posY": -0.05449629,
+        "posZ": 7.23574924,
+        "rotX": -4.27963823E-06,
+        "rotY": -0.004655632,
+        "rotZ": 2.88734736E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Tycho Celchu",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 20719,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "207": {
+          "FaceURL": "http://picload.org/image/wrpcwwi/httpwwwfotoshochladennetupload.jpg",
+          "BackURL": "http://i.imgur.com/z8o2eox.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "6ef07d"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -18.145113,
+        "posY": -0.05449629,
+        "posZ": 6.7328577,
+        "rotX": -3.740706E-06,
+        "rotY": 0.01569043,
+        "rotZ": -2.77214144E-06,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Push the Limit",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 22422,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "224": {
+          "FaceURL": "http://i.imgur.com/OykweiM.jpg",
+          "BackURL": "http://i.imgur.com/H69sETt.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "e8b6bf"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -18.00514,
+        "posY": -0.0544966459,
+        "posZ": 8.858024,
+        "rotX": -2.671124E-06,
+        "rotY": 359.74765,
+        "rotZ": -5.80982351E-06,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "A-Wing Test Pilot",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 21204,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "212": {
+          "FaceURL": "http://i.imgur.com/mNSQb9j.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1634616_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "0134b4"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -19.8363743,
+        "posY": -0.05449617,
+        "posZ": 6.736331,
+        "rotX": 6.83180951E-06,
+        "rotY": 0.0141672464,
+        "rotZ": -4.29665164E-07,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Proton Rockets",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 14707,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "147": {
+          "FaceURL": "http://i.imgur.com/N9zKEQX.jpg",
+          "BackURL": "http://i.imgur.com/ufO0Zmu.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "27efdb"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -19.6763248,
+        "posY": -0.0544964075,
+        "posZ": 8.890756,
+        "rotX": -7.116565E-07,
+        "rotY": 359.97348,
+        "rotZ": -5.30711E-06,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Wired",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 22430,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "224": {
+          "FaceURL": "http://i.imgur.com/OykweiM.jpg",
+          "BackURL": "http://i.imgur.com/H69sETt.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "0cc92d"
+    },
+    {
+      "Name": "Card",
+      "Transform": {
+        "posX": -21.42999,
+        "posY": -0.05449617,
+        "posZ": 6.71260166,
+        "rotX": 1.19242827E-06,
+        "rotY": 0.0106268106,
+        "rotZ": 1.866636E-07,
+        "scaleX": 0.625,
+        "scaleY": 1.0,
+        "scaleZ": 0.625
+      },
+      "Nickname": "Stealth Device",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.713235259,
+        "g": 0.713235259,
+        "b": 0.713235259
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CardID": 20118,
+      "SidewaysCard": false,
+      "CustomDeck": {
+        "201": {
+          "FaceURL": "http://i.imgur.com/QbxhN26.jpg",
+          "BackURL": "http://cf.geekdo-images.com/images/pic1634615_md.png",
+          "NumWidth": 10,
+          "NumHeight": 7,
+          "BackIsHidden": false,
+          "UniqueBack": false
+        }
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "6b4ad8"
+    }
+  ],
+  "TabStates": {}
+}

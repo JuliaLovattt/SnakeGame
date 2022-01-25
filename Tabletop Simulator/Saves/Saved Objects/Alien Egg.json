@@ -1,0 +1,120 @@
+{
+  "SaveName": "",
+  "GameMode": "",
+  "Gravity": 0.5,
+  "PlayArea": 0.5,
+  "Date": "",
+  "Table": "",
+  "Sky": "",
+  "Note": "",
+  "Rules": "",
+  "XmlUI": "",
+  "LuaScript": "",
+  "LuaScriptState": "",
+  "ObjectStates": [
+    {
+      "Name": "Custom_Model_Infinite_Bag",
+      "Transform": {
+        "posX": -24.7041988,
+        "posY": 1.15374947,
+        "posZ": -6.777775,
+        "rotX": -3.16711266E-05,
+        "rotY": 119.984558,
+        "rotZ": 4.48944957E-05,
+        "scaleX": 4.09999657,
+        "scaleY": 4.09999657,
+        "scaleZ": 4.09999657
+      },
+      "Nickname": "Alien Egg",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.9999998,
+        "g": 0.992162049,
+        "b": 0.9999998
+      },
+      "Locked": true,
+      "Grid": true,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "MaterialIndex": -1,
+      "MeshIndex": -1,
+      "CustomMesh": {
+        "MeshURL": "https://sites.google.com/site/tabletopsimulator4/figures_compilation_scifi/egg1.obj",
+        "DiffuseURL": "https://sites.google.com/site/tabletopsimulator4/figures_compilation_scifi/egg_difuse.jpg",
+        "NormalURL": "https://sites.google.com/site/tabletopsimulator4/figures_compilation_scifi/egg_normal.jpg",
+        "ColliderURL": "https://sites.google.com/site/tabletopsimulator4/figures_compilation_scifi/egg_collider.obj",
+        "Convex": true,
+        "MaterialIndex": 0,
+        "TypeIndex": 7,
+        "CustomShader": {
+          "SpecularColor": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0
+          },
+          "SpecularIntensity": 0.0,
+          "SpecularSharpness": 7.0,
+          "FresnelStrength": 0.4
+        },
+        "CastShadows": true
+      },
+      "XmlUI": "",
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "ContainedObjects": [
+        {
+          "Name": "Custom_Model",
+          "Transform": {
+            "posX": 50.83491,
+            "posY": 4.11436749,
+            "posZ": 24.8167934,
+            "rotX": 1.7352339,
+            "rotY": 239.950119,
+            "rotZ": 180.6084,
+            "scaleX": 1.29999971,
+            "scaleY": 1.29999971,
+            "scaleZ": 1.29999971
+          },
+          "Nickname": "Alien",
+          "Description": "Hsssss!",
+          "ColorDiffuse": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "IgnoreFoW": false,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "GridProjection": false,
+          "CustomMesh": {
+            "MeshURL": "http://cloud-3.steamusercontent.com/ugc/106232282990677968/0DE0A5C8A24DB6778FB7711376B39F03F526DA13/",
+            "DiffuseURL": "",
+            "NormalURL": "",
+            "ColliderURL": "",
+            "Convex": true,
+            "MaterialIndex": 2,
+            "TypeIndex": 0,
+            "CastShadows": true
+          },
+          "XmlUI": "",
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "b2b626"
+        }
+      ],
+      "GUID": "5cd179"
+    }
+  ],
+  "TabStates": {},
+  "VersionNumber": ""
+}
